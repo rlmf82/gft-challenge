@@ -1,6 +1,6 @@
 package com.db.awmd.challenge.exception;
 
-public class NoFundException extends RuntimeException {
+public class NoFundException extends BusinessException {
 
 	private static final long serialVersionUID = 255721644032051440L;
 

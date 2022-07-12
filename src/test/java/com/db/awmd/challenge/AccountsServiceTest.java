@@ -20,7 +20,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.domain.TransferMoney;
+import com.db.awmd.challenge.exception.AccountNotFoundException;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
+import com.db.awmd.challenge.exception.InvalidValueException;
 import com.db.awmd.challenge.exception.NoFundException;
 import com.db.awmd.challenge.repository.AccountsRepository;
 import com.db.awmd.challenge.service.AccountsService;
@@ -118,6 +120,70 @@ public class AccountsServiceTest {
 
 		} catch (NoFundException ex) {
 			assertTrue(ex.getMessage().equals(noFundsException.getMessage()));
+		}
+		
+		Mockito.verify(accountsRepositoryMock, Mockito.times(2)).getAccount(Mockito.any());
+		Mockito.verify(accountsRepositoryMock, Mockito.times(0)).updateAccount(Mockito.any());
+		Mockito.verify(notificationServiceMock, Mockito.times(0)).notifyAboutTransfer(Mockito.any(), Mockito.any());
+	}
+	
+	@Test
+	public void transferFunds_AcountNotFound() throws Exception {
+		String idAccountTo = "2";
+		String idAccountFrom = "1";
+		
+		doNothing().when(notificationServiceMock).notifyAboutTransfer(any(), any());
+		when(accountsRepositoryMock.getAccount(idAccountTo)).thenReturn(new Account(idAccountFrom, new BigDecimal("50")));
+		when(accountsRepositoryMock.getAccount(idAccountFrom)).thenReturn(null);
+		
+		AccountNotFoundException accountNotFoundException = new AccountNotFoundException(idAccountFrom);
+		
+		try {
+			this.accountsServiceInjected
+			.transferValuesAccount(
+					TransferMoney
+						.builder()
+						.accountFrom(idAccountFrom)
+						.accountTo(idAccountTo)
+						.value(new BigDecimal(100))
+						.build());
+			
+			fail("NoFundsException should be thrown");
+
+		} catch (AccountNotFoundException ex) {
+			assertTrue(ex.getMessage().equals(accountNotFoundException.getMessage()));
+		}
+		
+		Mockito.verify(accountsRepositoryMock, Mockito.times(1)).getAccount(Mockito.any());
+		Mockito.verify(accountsRepositoryMock, Mockito.times(0)).updateAccount(Mockito.any());
+		Mockito.verify(notificationServiceMock, Mockito.times(0)).notifyAboutTransfer(Mockito.any(), Mockito.any());
+	}
+	
+	@Test
+	public void transferFunds_NegativeAmount() throws Exception {
+		String idAccountTo = "2";
+		String idAccountFrom = "1";
+		
+		doNothing().when(notificationServiceMock).notifyAboutTransfer(any(), any());
+		when(accountsRepositoryMock.getAccount(idAccountTo)).thenReturn(new Account(idAccountFrom, new BigDecimal("50")));
+		when(accountsRepositoryMock.getAccount(idAccountFrom)).thenReturn(new Account(idAccountFrom, new BigDecimal("50")));
+		
+		InvalidValueException invalidValueException = new InvalidValueException();
+		
+		try {
+			this.accountsServiceInjected
+			.transferValuesAccount(
+					TransferMoney
+						.builder()
+						.accountFrom(idAccountFrom)
+						.accountTo(idAccountTo)
+						.value(new BigDecimal(-200))
+						.build());
+			
+			fail("NoFundsException should be thrown");
+
+		} catch (InvalidValueException ex) {
+			assertTrue(ex.getMessage().equals(invalidValueException.getMessage()));
 		}
 		
 		Mockito.verify(accountsRepositoryMock, Mockito.times(2)).getAccount(Mockito.any());

@@ -1,10 +1,12 @@
 package com.db.awmd.challenge.repository;
 
-import com.db.awmd.challenge.domain.Account;
-import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.stereotype.Repository;
+
+import com.db.awmd.challenge.domain.Account;
+import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 
 @Repository
 public class AccountsRepositoryInMemory implements AccountsRepository {
@@ -13,7 +15,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 	@Override
 	public void createAccount(Account account) throws DuplicateAccountIdException {
-		Account previousAccount = accounts.putIfAbsent(account.getAccountId().toLowerCase(), account);
+		Account previousAccount = accounts.putIfAbsent(account.getAccountId(), account);
 		if (previousAccount != null) {
 			throw new DuplicateAccountIdException(
 					"Account id " + account.getAccountId() + " already exists!");
@@ -22,7 +24,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 	@Override
 	public Account getAccount(String accountId) {
-		return accounts.get(accountId.toLowerCase());
+		return accounts.get(accountId);
 	}
 
 	@Override
@@ -32,6 +34,6 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 	@Override
 	public void updateAccount(Account account) {
-		accounts.replace(account.getAccountId().toLowerCase(), account);
+		accounts.replace(account.getAccountId(), account);
 	}
 }

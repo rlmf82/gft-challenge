@@ -1,6 +1,6 @@
 package com.db.awmd.challenge.exception;
 
-public class AccountNotFoundException extends RuntimeException {
+public class AccountNotFoundException extends BusinessException {
 
 	private static final long serialVersionUID = 255721644032051440L;
 

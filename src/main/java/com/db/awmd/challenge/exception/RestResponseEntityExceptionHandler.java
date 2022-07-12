@@ -21,6 +21,16 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 	@ExceptionHandler(value = {RuntimeException.class})
 	protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
 		Map<String, Object> body = new LinkedHashMap<>();
+		
+		body.put("timestamp", LocalDateTime.now().toString());
+		body.put("error", ex.getMessage());
+
+		return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(value = {BusinessException.class})
+	protected ResponseEntity<Object> handleConflict(BusinessException ex, WebRequest request) {
+		Map<String, Object> body = new LinkedHashMap<>();
 
 		body.put("timestamp", LocalDateTime.now().toString());
 		body.put("error", ex.getMessage());

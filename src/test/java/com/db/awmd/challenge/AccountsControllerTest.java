@@ -126,7 +126,7 @@ public class AccountsControllerTest {
 		
 		String request = IOUtils.toString(transferFunds100Json.getInputStream(), StandardCharsets.UTF_8);
 
-		this.mockMvc.perform(patch("/v1/accounts/transference")
+		this.mockMvc.perform(post("/v1/accounts/transference")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(request))
 		.andExpect(status().isAccepted());
@@ -148,7 +148,7 @@ public class AccountsControllerTest {
 		
 		String request = IOUtils.toString(transferFunds100Json.getInputStream(), StandardCharsets.UTF_8);
 
-		this.mockMvc.perform(patch("/v1/accounts/transference")
+		this.mockMvc.perform(post("/v1/accounts/transference")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(request))
 		.andExpect(status().isBadRequest());
